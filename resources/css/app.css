@@ -1,0 +1,237 @@
+@import 'bootstrap';
+
+
+.navbar-brand img {
+    height: 40px;
+}
+
+.city-nav .nav-link {
+    color: #333;
+    font-weight: 500;
+    padding: 8px 15px;
+    border-radius: 4px;
+    margin: 0 2px;
+    transition: all 0.3s ease;
+}
+
+.city-nav .nav-link:hover,
+.city-nav .nav-link.active {
+    background-color: #dc3545;
+    color: white;
+}
+
+.epaper-title {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+.page-controls {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.page-thumbnail {
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.page-thumbnail:hover,
+.page-thumbnail.active {
+    border-color: #dc3545;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+    transform: translateY(-2px);
+}
+
+.page-thumbnail img {
+    width: 100%;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.page-thumbnail:hover img {
+    transform: scale(1.05);
+}
+
+.main-page-view {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.main-page-view img {
+    max-width: 100%;
+    height: auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border-radius: 4px;
+}
+
+.social-share {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.social-share .btn {
+    margin: 3px;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.social-share .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-facebook { background: #3b5998; border-color: #3b5998; }
+.btn-twitter { background: #1da1f2; border-color: #1da1f2; }
+.btn-linkedin { background: #0077b5; border-color: #0077b5; }
+.btn-whatsapp { background: #25d366; border-color: #25d366; }
+.btn-print { background: #6c757d; border-color: #6c757d; }
+.btn-email { background: #dc3545; border-color: #dc3545; }
+
+.download-dropdown .dropdown-toggle::after {
+    margin-left: 10px;
+}
+
+.pagination-controls .btn {
+    margin: 0 3px;
+}
+
+.date-picker {
+    max-width: 200px;
+}
+
+.page-selector {
+    max-width: 150px;
+}
+
+.sidebar-thumbnails {
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.sidebar-thumbnails::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-thumbnails::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.sidebar-thumbnails::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.sidebar-thumbnails::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.thumbnail-label {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.card {
+    transition: all 0.3s ease;
+    border: 1px solid #ddd;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .sidebar-thumbnails {
+        max-height: 150px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        padding-bottom: 10px;
+    }
+    
+    .page-thumbnail {
+        display: inline-block;
+        width: 80px;
+        margin-right: 10px;
+        margin-bottom: 0;
+    }
+    
+    .city-nav {
+        flex-wrap: wrap;
+    }
+    
+    .city-nav .nav-link {
+        font-size: 0.9rem;
+        padding: 6px 10px;
+    }
+    
+    .page-controls {
+        padding: 10px;
+    }
+    
+    .epaper-title {
+        font-size: 1.3rem;
+    }
+    
+    .social-share .btn {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-page-view {
+        padding: 10px;
+    }
+    
+    .page-controls .row > div {
+        margin-bottom: 10px;
+    }
+    
+    .pagination-controls .btn {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+    }
+}
