@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'E-Paper Archive - ' . $city)
+@section('title', 'E-Paper Archive - ' . $edition)
 
 @section('content')
 <div class="container my-4">
@@ -28,12 +28,12 @@
         <div class="row align-items-center">
             <div class="col-lg-3 col-md-6 mb-3">
                 <label for="cityFilter" class="form-label">
-                    <i class="fas fa-map-marker-alt"></i> City:
+                    <i class="fas fa-map-marker-alt"></i> Edition:
                 </label>
                 <select class="form-select" id="cityFilter" onchange="filterArchive()">
-                    @foreach($cities as $cityName)
-                        <option value="{{ $cityName }}" {{ $city == $cityName ? 'selected' : '' }}>
-                            {{ $cityName }}
+                    @foreach($cities as $editionName)
+                        <option value="{{ $editionName }}" {{ $edition == $editionName ? 'selected' : '' }}>
+                            {{ $editionName }}
                         </option>
                     @endforeach
                 </select>
@@ -150,7 +150,7 @@
                                     <p class="card-text mb-2">
                                         <small class="text-muted">
                                             <i class="fas fa-calendar"></i> {{ $epaper->formatted_date }}<br>
-                                            <i class="fas fa-map-marker-alt"></i> {{ $epaper->city }}<br>
+                                            <i class="fas fa-map-marker-alt"></i> {{ $epaper->edition }}<br>
                                             <i class="fas fa-clock"></i> {{ $epaper->created_at->diffForHumans() }}
                                         </small>
                                     </p>
@@ -172,7 +172,7 @@
                             <!-- Card Footer -->
                             <div class="card-footer bg-transparent">
                                 <div class="d-flex gap-1">
-                                    <a href="{{ route('epaper.index', ['date' => $epaper->publication_date->format('Y-m-d'), 'city' => $epaper->city]) }}" 
+                                    <a href="{{ route('epaper.index', ['date' => $epaper->publication_date->format('Y-m-d'), 'edition' => $epaper->edition]) }}" 
                                        class="btn btn-primary btn-sm flex-fill" title="Read E-Paper">
                                         <i class="fas fa-eye"></i> Read
                                     </a>
@@ -183,7 +183,7 @@
                                         </a>
                                     @endif
                                     <button class="btn btn-outline-secondary btn-sm" 
-                                            onclick="shareEpaper('{{ $epaper->id }}', '{{ $epaper->title }}', '{{ $epaper->publication_date->format('Y-m-d') }}', '{{ $epaper->city }}')"
+                                            onclick="shareEpaper('{{ $epaper->id }}', '{{ $epaper->title }}', '{{ $epaper->publication_date->format('Y-m-d') }}', '{{ $epaper->edition }}')"
                                             title="Share">
                                         <i class="fas fa-share-alt"></i>
                                     </button>
@@ -204,7 +204,7 @@
                             <th>Preview</th>
                             <th>Title</th>
                             <th>Date</th>
-                            <th>City</th>
+                            <th>Edition</th>
                             <th>Pages</th>
                             <th>PDF</th>
                             <th>Actions</th>
@@ -233,7 +233,7 @@
                                     <br><small class="text-muted">{{ $epaper->created_at->diffForHumans() }}</small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-secondary">{{ $epaper->city }}</span>
+                                    <span class="badge bg-secondary">{{ $epaper->edition }}</span>
                                 </td>
                                 <td>
                                     <span class="badge bg-info">{{ $epaper->total_pages }}</span>
@@ -251,7 +251,7 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="{{ route('epaper.index', ['date' => $epaper->publication_date->format('Y-m-d'), 'city' => $epaper->city]) }}" 
+                                        <a href="{{ route('epaper.index', ['date' => $epaper->publication_date->format('Y-m-d'), 'edition' => $epaper->edition]) }}" 
                                            class="btn btn-outline-primary" title="Read">
                                             <i class="fas fa-eye"></i>
                                         </a>
@@ -262,7 +262,7 @@
                                             </a>
                                         @endif
                                         <button class="btn btn-outline-secondary" 
-                                                onclick="shareEpaper('{{ $epaper->id }}', '{{ $epaper->title }}', '{{ $epaper->publication_date->format('Y-m-d') }}', '{{ $epaper->city }}')"
+                                                onclick="shareEpaper('{{ $epaper->id }}', '{{ $epaper->title }}', '{{ $epaper->publication_date->format('Y-m-d') }}', '{{ $epaper->edition }}')"
                                                 title="Share">
                                             <i class="fas fa-share-alt"></i>
                                         </button>
@@ -439,11 +439,11 @@
     let currentView = 'grid';
 
     function filterArchive() {
-        const city = document.getElementById('cityFilter').value;
+        const edition = document.getElementById('cityFilter').value;
         const month = document.getElementById('monthFilter').value;
         
         const url = new URL(window.location);
-        url.searchParams.set('city', city);
+        url.searchParams.set('edition', edition);
         url.searchParams.set('month', month);
         
         window.location.href = url.toString();
@@ -506,9 +506,9 @@
         }
     }
 
-    function shareEpaper(id, title, date, city) {
+    function shareEpaper(id, title, date, edition) {
         shareTitle = title;
-        shareUrl = `{{ url('/epaper') }}?date=${date}&city=${city}`;
+        shareUrl = `{{ url('/epaper') }}?date=${date}&edition=${edition}`;
         
         document.getElementById('shareTitle').textContent = title;
         document.getElementById('shareLink').value = shareUrl;

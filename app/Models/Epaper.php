@@ -17,7 +17,7 @@ class Epaper extends Model
     protected $fillable = [
         'title',
         'publication_date',
-        'city',
+        'edition',
         'pdf_path',
         'total_pages',
         'is_active',
@@ -50,9 +50,9 @@ class Epaper extends Model
     /**
      * Scope: Filter by city.
      */
-    public function scopeByCity($query, string $city)
+    public function scopeByCity($query, string $edition)
     {
-        return $query->where('city', $city);
+        return $query->where('edition', $edition);
     }
 
     /**

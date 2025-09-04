@@ -54,12 +54,12 @@
 
                     <div class="col-md-3">
                         <div class="mb-3">
-                            <label for="city" class="form-label">City *</label>
-                            <select class="form-select" id="city" name="city" required>
-                                <option value="">Select City</option>
-                                @foreach(['Odisha', 'Ranchi', 'Delhi', 'Mumbai', 'Kolkata'] as $cityName)
-                                    <option value="{{ $cityName }}" {{ old('city') == $cityName ? 'selected' : '' }}>
-                                        {{ $cityName }}
+                            <label for="edition" class="form-label">Edition *</label>
+                            <select class="form-select" id="edition" name="edition" required>
+                                <option value="">Select Edition</option>
+                                @foreach(['Odisha', 'Ranchi', 'Delhi', 'Mumbai', 'Kolkata'] as $editionName)
+                                    <option value="{{ $editionName }}" {{ old('edition') == $editionName ? 'selected' : '' }}>
+                                        {{ $editionName }}
                                     </option>
                                 @endforeach
                             </select>
@@ -78,7 +78,7 @@
                     <label for="page_images" class="form-label">Page Images *</label>
                     <input type="file" class="form-control" id="page_images" name="page_images[]"
                            accept="image/*" multiple required onchange="previewImages(this)">
-                    <div class="form-text">Upload individual page images (JPEG, PNG). Select multiple files in order.</div>
+                    <div class="form-text">Upload individual page images (WEBP, JPG, JPEG, PNG). Select multiple files in order.</div>
                 </div>
 
                 <!-- Image Preview -->
@@ -352,23 +352,23 @@
         document.getElementById('submitBtn').disabled = true;
     });
 
-    document.getElementById('city').addEventListener('change', generateTitle);
+    document.getElementById('edition').addEventListener('change', generateTitle);
     document.getElementById('publication_date').addEventListener('change', generateTitle);
 
     function generateTitle() {
         const titleField = document.getElementById('title');
         if (titleField.value.trim() !== '') return; 
 
-        const city = document.getElementById('city').value;
+        const edition = document.getElementById('edition').value;
         const date = document.getElementById('publication_date').value;
 
-        if (city && date) {
+        if (edition && date) {
             const formattedDate = new Date(date).toLocaleDateString('en-GB', {
                 day: '2-digit',
                 month: 'short',
                 year: 'numeric'
             });
-            titleField.value = `${city} Edition  `;
+            titleField.value = `${edition} Edition  `;
         }
     }
 </script>

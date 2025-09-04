@@ -255,7 +255,7 @@
                                         <th>ID</th>
                                         <th>Title</th>
                                         <th>Date</th>
-                                        <th>City</th>
+                                        <th>Edition</th>
                                         <th>Pages</th>
                                         <th>PDF</th>
                                         <th>Status</th>
@@ -269,7 +269,7 @@
                                             <td>{{ $epaper->title }}</td>
                                             <td>{{ $epaper->formatted_date }}</td>
                                             <td>
-                                                <span class="badge bg-secondary">{{ $epaper->city }}</span>
+                                                <span class="badge bg-secondary">{{ $epaper->edition }}</span>
                                             </td>
                                             <td>
                                                 <span class="badge bg-info">{{ $epaper->total_pages }} pages</span>
@@ -294,7 +294,7 @@
                                             </td>
                                             <td>
                                                 <div class="btn-group btn-group-sm" role="group">
-                                                    <a href="{{ route('epaper.index', ['date' => $epaper->publication_date->format('Y-m-d'), 'city' => $epaper->city]) }}" 
+                                                    <a href="{{ route('epaper.index', ['date' => $epaper->publication_date->format('Y-m-d'), 'edition' => $epaper->edition]) }}" 
                                                        class="btn btn-outline-primary" title="View">
                                                         <i class="bi bi-eye"></i>
                                                     </a>

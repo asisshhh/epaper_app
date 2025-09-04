@@ -29,13 +29,13 @@ class DatabaseSeeder extends Seeder
         for ($i = 0; $i < 10; $i++) {
             $date = Carbon::now()->subDays($i);
 
-            foreach ($cities as $city) {
+            foreach ($cities as $edition) {
                 $epaper = Epaper::create([
-                    'title' => "{$city} Edition - " . $date->format('d-M-Y'),
+                    'title' => "{$edition} Edition - " . $date->format('d-M-Y'),
                     'publication_date' => $date,
-                    'city' => $city,
+                    'edition' => $edition,
                     'total_pages' => $totalPages = rand(8, 16),
-                    'pdf_path' => "epapers/sample/{$city}_{$date->format('Ymd')}.pdf",
+                    'pdf_path' => "epapers/sample/{$edition}_{$date->format('Ymd')}.pdf",
                     'is_active' => true,
                 ]);
 

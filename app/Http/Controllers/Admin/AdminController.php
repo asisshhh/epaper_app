@@ -34,10 +34,10 @@ public function __construct()
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'publication_date' => ['required', 'date'],
-            'city' => ['required', 'string', 'max:100'],
+            'edition' => ['required', 'string', 'max:100'],
             'pdf_file' => ['nullable', 'file', 'mimes:pdf', 'max:102400'],
             'page_images' => ['required', 'array'],
-            'page_images.*' => ['image', 'mimes:jpeg,png,jpg', 'max:102400'],
+            'page_images.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:102400'],
         ]);
 
         DB::beginTransaction();
@@ -46,7 +46,7 @@ public function __construct()
             $epaper = Epaper::create([
                 'title' => $validated['title'],
                 'publication_date' => $validated['publication_date'],
-                'city' => $validated['city'],
+                'edition' => $validated['edition'],
                 'total_pages' => count($validated['page_images']),
                 'pdf_path' => null,
             ]);
@@ -118,11 +118,11 @@ public function __construct()
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'publication_date' => ['required', 'date'],
-            'city' => ['required', 'string', 'max:100'],
+            'edition' => ['required', 'string', 'max:100'],
             'is_active' => ['boolean'],
             'pdf_file' => ['nullable', 'file', 'mimes:pdf', 'max:102400'],
             'page_images' => ['nullable', 'array'],
-            'page_images.*' => ['image', 'mimes:jpeg,png,jpg', 'max:102400'],
+            'page_images.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:102400'],
             'page_order' => ['nullable', 'string'],
             'deleted_pages' => ['nullable', 'string'],
         ]);
@@ -134,7 +134,7 @@ public function __construct()
             $updateData = [
                 'title' => $validated['title'],
                 'publication_date' => $validated['publication_date'],
-                'city' => $validated['city'],
+                'edition' => $validated['edition'],
                 'is_active' => $request->has('is_active') ? (bool)$validated['is_active'] : $epaper->is_active,
             ];
 

@@ -130,7 +130,7 @@
         }
 
         .sidebar-thumbnails {
-            max-height: 1651px;
+            max-height: 1300px;
             overflow-y: auto;
         }
 
@@ -181,11 +181,11 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto city-nav">
-                    @foreach(['Odisha', 'Ranchi', 'Delhi', 'Mumbai', 'Kolkata'] as $cityName)
+                    @foreach(['Odisha', 'Ranchi', 'Delhi', 'Mumbai', 'Kolkata'] as $editionName)
                         <li class="nav-item">
-                            <a class="nav-link {{ request('city', 'Odisha') === $cityName ? 'active' : '' }}"
-                               href="{{ route('epaper.index', ['city' => $cityName]) }}">
-                                {{ $cityName }}
+                            <a class="nav-link {{ request('edition', 'Odisha') === $editionName ? 'active' : '' }}"
+                               href="{{ route('epaper.index', ['edition' => $editionName]) }}">
+                                {{ $editionName }}
                             </a>
                         </li>
                     @endforeach
@@ -199,7 +199,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.index') }}">
-                            <i class="fas fa-cog"></i> Admin
+                            
                         </a>
                     </li>
                 </ul>
@@ -227,12 +227,12 @@
     {{-- <script>
     // Auto redirect from query string to clean URL
     const params = new URLSearchParams(window.location.search);
-    const city = params.get('city');
+    const edition = params.get('edition');
     const date = params.get('date');
 
-    if (city && date) {
+    if (edition && date) {
         // Clean URL pattern
-        const cleanUrl = `/archive/${city.toLowerCase()}/${date}`;
+        const cleanUrl = `/archive/${edition.toLowerCase()}/${date}`;
         window.location.replace(cleanUrl);
     }
 </script> --}}

@@ -34,8 +34,8 @@ Route::get('/epaper', [EpaperController::class, 'index'])->name('epaper.home');
 Route::get('/epaper/page', [EpaperController::class, 'getPage'])->name('epaper.getPage');
 Route::get('/epaper/download', [EpaperController::class, 'downloadPdf'])->name('epaper.download');
 Route::get('/epaper/archive', [EpaperController::class, 'archive'])->name('epaper.archive');
-Route::get('/epaper/{city}/{date?}', [EpaperController::class, 'index'])->name('epaper.view');
-Route::get('/epaper/{city}/{date}/page/{page}', [EpaperController::class, 'archive'])->name('epaper.viewPage');
+Route::get('/epaper/{edition}/{date?}', [EpaperController::class, 'index'])->name('epaper.view');
+Route::get('/epaper/{edition}/{date}/page/{page}', [EpaperController::class, 'archive'])->name('epaper.viewPage');
 
 /*
 |--------------------------------------------------------------------------

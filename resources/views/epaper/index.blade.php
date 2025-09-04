@@ -34,10 +34,19 @@
                 </select>
             </div>
             <div class="col-lg-3 col-md-6 mb-2">
-            <a class="navbar-brand" href="{{ route('epaper.index') }}">
-                 <img src="{{ asset('logo/image.png') }}" alt="Main Logo" height="40">
-                 
-            </a>
+            <div class="btn-group" role="group" aria-label="Zoom controls">
+                        
+                        <button class="btn btn-outline-secondary btn-sm me-1" onclick="zoomOut()" title="Zoom Out">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <span id="zoomLevel" class="mx-2">100%</span>
+                        <button class="btn btn-outline-secondary btn-sm me-2" onclick="zoomIn()" title="Zoom In">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="resetZoom()" title="Reset Zoom">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                        </button>
+                    </div>
         </div>
 
            {{-- <div class="col-lg-3 col-md-6 mb-2">
@@ -97,53 +106,10 @@
         
         <!-- Pagination -->
        <div class="row mt-3">
-    <div class="col-12">
-        <nav aria-label="Epaper page navigation">
-            <ul class="pagination flex-wrap align-items-center mb-0">
-                <li class="page-item {{ !$epaper || $page <= 0 ? 'disabled' : '' }}">
-                    <button class="page-link" onclick="firstPage()" tabindex="-1">
-                        <i class="fas fa-angle-double-left"></i> First
-                    </button>
-                </li>
-                <li class="page-item {{ !$epaper || $page <= 0 ? 'disabled' : '' }}">
-                    <button class="page-link" onclick="prevPage()" tabindex="-1">
-                        <i class="fas fa-angle-left"></i> Prev
-                    </button>
-                </li>
+    
               
-                
-           
-
-                    
-                    <!-- Zoom -->
-                     <div class="col-md-8 d-flex justify-content-center mb-2 mb-md-0">
-        <div class="btn-group" role="group" aria-label="Zoom controls">
-                        <span class="me-2">Zoom:</span>
-                        <button class="btn btn-outline-secondary btn-sm me-1" onclick="zoomOut()" title="Zoom Out">
-                            <i class="fas fa-search-minus"></i>
-                        </button>
-                        <span id="zoomLevel" class="mx-2">100%</span>
-                        <button class="btn btn-outline-secondary btn-sm me-2" onclick="zoomIn()" title="Zoom In">
-                            <i class="fas fa-search-plus"></i>
-                        </button>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="resetZoom()" title="Reset Zoom">
-                            <i class="fas fa-expand-arrows-alt"></i>
-                        </button>
-                    </div>
-                </div>
-                         <li class="page-item {{ !$epaper || $page >= ($epaper->total_pages ?? 1) ? 'disabled' : '' }}">
-                    <button class="page-link" onclick="nextPage()">
-                        Next <i class="fas fa-angle-right"></i>
-                    </button>
-                </li>
-                <li class="page-item {{ !$epaper || $page >= ($epaper->total_pages ?? 1) ? 'disabled' : '' }}">
-                    <button class="page-link" onclick="lastPage()">
-                        Last <i class="fas fa-angle-double-right"></i>
-                    </button>
-                </li>
-            </ul>
-        </nav>
-                </div>
+            
+                         
             </div>
         </div>
     </div>
@@ -173,19 +139,51 @@
             </div>
             
             <!-- Main Page View -->
-            <div class="col-lg-10 col-md-9" id="mainContentArea">
+            <div class="col-lg-8 col-md-6" id="mainContentArea">
                 <div class="main-page-view" id="mainPageView">
-                    @php
-                        $currentPage = $epaper->pages->where('page_number', $page)->first();
-                    @endphp
-                    
-                    @if($currentPage)
-                        <div class="page-info mb-3">
-                            <h4 class="text-center">
-                                {{ $epaper->title }} - {{ $epaper->formatted_date }}
-                                <span class="badge bg-primary ms-2">Page {{ $currentPage->page_number }}</span>
-                            </h4>
-                        </div>
+                    <nav aria-label="Epaper page navigation">
+    <div class="d-flex justify-content-between align-items-center w-100">
+
+        {{-- Left buttons --}}
+        <ul class="pagination mb-0">
+            <li class="page-item {{ !$epaper || $page <= 0 ? 'disabled' : '' }}">
+                <button class="page-link" onclick="firstPage()" tabindex="-1">
+                    <i class="fas fa-angle-double-left"></i> First
+                </button>
+            </li>
+            <li class="page-item {{ !$epaper || $page <= 0 ? 'disabled' : '' }}">
+                <button class="page-link" onclick="prevPage()" tabindex="-1">
+                    <i class="fas fa-angle-left"></i> Prev
+                </button>
+            </li>
+        </ul>
+
+        {{-- Page info --}}
+        @if($epaper && $currentPage = $epaper->pages->where('page_number', $page)->first())
+            <div class="page-info text-center">
+                <h6 class="mb-0">
+                    {{ $epaper->title }} - {{ $epaper->formatted_date }}
+                    <span class="badge bg-primary ms-2">Page {{ $currentPage->page_number }}</span>
+                </h6>
+            </div>
+
+        {{-- Right buttons --}}
+        <ul class="pagination mb-0">
+            <li class="page-item {{ !$epaper || $page >= ($epaper->total_pages ?? 1) ? 'disabled' : '' }}">
+                <button class="page-link" onclick="nextPage()">
+                    Next <i class="fas fa-angle-right"></i>
+                </button>
+            </li>
+            <li class="page-item {{ !$epaper || $page >= ($epaper->total_pages ?? 1) ? 'disabled' : '' }}">
+                <button class="page-link" onclick="lastPage()">
+                    Last <i class="fas fa-angle-double-right"></i>
+                </button>
+            </li>
+        </ul>
+
+    </div>
+</nav>
+
                         
                         <div class="image-container" id="imageContainer">
                             <img id="mainPageImage" 
@@ -252,7 +250,19 @@
                     </div>
                 </div>
             </div>
+            <div class="col-lg-2 col-md-3" id="adsSidebar">
+        <div class="sidebar-header mb-3">
+            <h6 class="text-muted"><i class="fas fa-ad"></i> Ads</h6>
         </div>
+        <div class="sidebar-thumbnails">
+            <img src="{{ asset('logo/image.png') }}" class="img-fluid mb-3" alt="Ad 1">
+            <img src="{{ asset('logo/image.png') }}" class="img-fluid mb-3" alt="Ad 2">
+            {{-- More ads here --}}
+        </div>
+    </div>
+        </div>
+        
+            
         
         <!-- List View -->
         {{-- <div class="row" id="listViewContent" style="display: none;">
@@ -287,7 +297,7 @@
                 <div class="alert alert-warning text-center py-5">
                     <i class="fas fa-exclamation-triangle fa-4x mb-3 text-warning"></i>
                     <h3>No E-Paper Available</h3>
-                    <p class="lead">E-Paper for {{ date('d-M-Y', strtotime($date)) }} in {{ $city }} is not available.</p>
+                    <p class="lead">E-Paper for {{ date('d-M-Y', strtotime($date)) }} in {{ $edition }} is not available.</p>
                     <div class="mt-4">
                         <a href="{{ route('epaper.index') }}" class="btn btn-primary btn-lg me-2">
                             <i class="fas fa-home"></i> Go to Latest Edition
@@ -328,7 +338,7 @@
 <script>
     let currentEpaper = @json($epaper);
     let currentPage = {{ $page }};
-    let currentCity = '{{ $city }}';
+    let currentCity = '{{ $edition }}';
     let currentZoom = 100;
     let currentView = 'grid';
 
@@ -352,7 +362,7 @@
     function changeDate() {
         const date = document.getElementById('dateSelect').value;
         showLoading();
-        window.location.href = `{{ route('epaper.index') }}?date=${date}&city=${currentCity}`;
+        window.location.href = `{{ route('epaper.index') }}?date=${date}&edition=${currentCity}`;
     }
 
     function changePage() {

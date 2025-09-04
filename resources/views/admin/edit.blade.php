@@ -64,10 +64,10 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="city" class="form-label">City <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('city') is-invalid @enderror" 
-                                   id="city" name="city" value="{{ old('city', $epaper->city) }}" required>
-                            @error('city')
+                            <label for="edition" class="form-label">Edition <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('edition') is-invalid @enderror" 
+                                   id="edition" name="edition" value="{{ old('edition', $epaper->edition) }}" required>
+                            @error('edition')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

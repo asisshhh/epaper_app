@@ -18,17 +18,17 @@ class EpaperController extends Controller
 public function index(Request $request): View
 {
     $date = $request->get('date', now()->format('Y-m-d'));
-    $city = $request->get('city', 'Odisha');
+    $edition = $request->get('edition', 'Odisha');
     $page = (int) $request->get('page', 1);
 
-    $epaper = Epaper::byCity($city)
+    $epaper = Epaper::byCity($edition)
         ->byDate($date)
         ->active()
         ->with('pages')
         ->first();
 
     if (!$epaper) {
-        $epaper = Epaper::byCity($city)
+        $epaper = Epaper::byCity($edition)
             ->active()
             ->with('pages')
             ->latest('publication_date')
@@ -53,7 +53,7 @@ public function index(Request $request): View
     : null;
 
 return view('epaper.index', compact(
-    'epaper', 'currentPage', 'cities', 'date', 'city', 'page', 'pdfUrl'
+    'epaper', 'currentPage', 'cities', 'date', 'edition', 'page', 'pdfUrl'
 ));
 
 }
@@ -106,13 +106,13 @@ return view('epaper.index', compact(
      */
     public function archive(Request $request): View
     {
-        $city = $request->get('city', 'Odisha');
+        $edition = $request->get('edition', 'Odisha');
         $month = $request->get('month', now()->format('Y-m'));
 
         $year = substr($month, 0, 4);
         $monthNum = substr($month, 5, 2);
 
-        $epapers = Epaper::byCity($city)
+        $epapers = Epaper::byCity($edition)
             ->whereYear('publication_date', $year)
             ->whereMonth('publication_date', $monthNum)
             ->active()
@@ -121,6 +121,6 @@ return view('epaper.index', compact(
 
         $cities = ['Odisha', 'Ranchi', 'Delhi', 'Mumbai', 'Kolkata'];
 
-        return view('epaper.archive', compact('epapers', 'cities', 'city', 'month'));
+        return view('epaper.archive', compact('epapers', 'cities', 'edition', 'month'));
     }
 }
