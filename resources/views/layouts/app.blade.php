@@ -181,9 +181,9 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto city-nav">
-                    @foreach(['Odisha', 'Ranchi', 'Delhi', 'Mumbai', 'Kolkata'] as $editionName)
+                    @foreach(['Bhubaneswar'] as $editionName)
                         <li class="nav-item">
-                            <a class="nav-link {{ request('edition', 'Odisha') === $editionName ? 'active' : '' }}"
+                            <a class="nav-link {{ request('edition', 'Bhubaneswar') === $editionName ? 'active' : '' }}"
                                href="{{ route('epaper.index', ['edition' => $editionName]) }}">
                                 {{ $editionName }}
                             </a>

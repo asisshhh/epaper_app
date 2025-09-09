@@ -18,7 +18,7 @@ class EpaperController extends Controller
 public function index(Request $request): View
 {
     $date = $request->get('date', now()->format('Y-m-d'));
-    $edition = $request->get('edition', 'Odisha');
+    $edition = $request->get('edition', 'Bhubaneswar');
     $page = (int) $request->get('page', 1);
 
     $epaper = Epaper::byCity($edition)
@@ -45,7 +45,7 @@ public function index(Request $request): View
         $currentPage = $pages->get($page - 1); // 0-indexed
     }
 
-    $cities = ['Odisha', 'Ranchi', 'Delhi', 'Mumbai', 'Kolkata'];
+    $cities = ['Bhubaneswar'];
 
     // Generate PDF URL
  $pdfUrl = $epaper && $epaper->pdf_path
@@ -106,7 +106,7 @@ return view('epaper.index', compact(
      */
     public function archive(Request $request): View
     {
-        $edition = $request->get('edition', 'Odisha');
+        $edition = $request->get('edition', 'Bhubaneswar');
         $month = $request->get('month', now()->format('Y-m'));
 
         $year = substr($month, 0, 4);
@@ -119,7 +119,7 @@ return view('epaper.index', compact(
             ->orderByDesc('publication_date')
             ->paginate(15);
 
-        $cities = ['Odisha', 'Ranchi', 'Delhi', 'Mumbai', 'Kolkata'];
+        $cities = ['Bhubaneswar'];
 
         return view('epaper.archive', compact('epapers', 'cities', 'edition', 'month'));
     }

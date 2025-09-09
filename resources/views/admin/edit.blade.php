@@ -17,6 +17,7 @@
 
     @if($errors->any())
         <div class="alert alert-danger">
+            <h6><i class="fas fa-exclamation-triangle"></i> Please fix the following errors:</h6>
             <ul class="mb-0">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -25,7 +26,7 @@
         </div>
     @endif
 
-    <div class="card">
+    <div class="card shadow">
         <div class="card-header">
             <h5 class="card-title mb-0">
                 <i class="bi bi-pencil-square"></i> Edit E-Paper Details
@@ -108,76 +109,170 @@
                     @endif
                 </div>
 
-                <div class="mb-3">
-                    <label for="page_images" class="form-label">Page Images</label>
-                    <input type="file" class="form-control @error('page_images') is-invalid @enderror @error('page_images.*') is-invalid @enderror" 
-                           id="page_images" name="page_images[]" accept="image/jpeg,image/png,image/jpg" multiple>
-
-                    @error('page_images')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                    @error('page_images.*')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                    
-                    <div class="form-text">
-                        <small class="text-muted">
-                            Current pages: <strong>{{ $epaper->total_pages }}</strong>
-                            <br>Upload new images to replace all existing page images. Leave empty to keep current pages.
-                            <br>Accepted formats: JPEG, PNG, JPG. Max file size: 100MB per image.
-                        </small>
-                    </div>
-
-                    <!-- Current Pages Preview -->
-                    @if($epaper->pages->count() > 0)
-                        <div class="mt-3" id="currentPagesSection">
-                            <h6>Current Pages Preview:</h6>
-                            <div class="row sortable-container" id="currentPagesContainer">
-                                @foreach($epaper->pages as $page)
-                                    <div class="col-md-2 col-sm-3 col-4 mb-3 draggable-item" 
-                                         draggable="true" 
-                                         data-page-id="{{ $page->id }}"
-                                         data-type="existing">
-                                        <div class="card h-100 position-relative">
-                                            <div class="drag-handle">
-                                                <i class="bi bi-grip-vertical"></i>
+                <!-- Current Pages Management Section -->
+                @if($epaper->pages->count() > 0)
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <label class="form-label mb-0">Current Pages ({{ $epaper->pages->count() }})</label>
+                            <div>
+                                <button type="button" class="btn btn-outline-success btn-sm" onclick="addPageAfter()">
+                                    <i class="fas fa-plus"></i> Insert Page
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addPageAtEnd()">
+                                    <i class="fas fa-plus-circle"></i> Add to End
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="currentPagesContainer">
+                            @foreach($epaper->pages->sortBy('page_number') as $index => $page)
+                                <div class="existing-page-item mb-3" data-page-id="{{ $page->id }}" data-original-order="{{ $index }}">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2">
+                                            <label class="form-label small">Page {{ $index + 1 }}:</label>
+                                            <div class="page-thumbnail">
+                                                <img src="{{ asset('storage/' . $page->thumbnail_path) }}" 
+                                                     alt="Page {{ $page->page_number }}"
+                                                     style="width: 100%; height: 60px; object-fit: cover; border-radius: 4px;">
                                             </div>
-                                            <img src="{{ asset('storage/' . $page->thumbnail_path) }}" 
-                                                 class="card-img-top" alt="Page {{ $page->page_number }}"
-                                                 style="height: 100px; object-fit: cover;">
-                                            <div class="page-number">Page {{ $page->page_number }}</div>
-                                            <button type="button" class="btn btn-danger btn-sm delete-page-btn" 
-                                                    data-page-id="{{ $page->id }}"
-                                                    title="Remove this page">
-                                                <i class="bi bi-trash"></i>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="page-info">
+                                                <small class="text-muted d-block">Current page</small>
+                                                <small class="text-info">Original: Page {{ $page->page_number }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="file" class="form-control form-control-sm page-replacement" 
+                                                   name="page_replacements[{{ $page->id }}]" 
+                                                   accept="image/*" 
+                                                   onchange="previewReplacement(this, {{ $page->id }})"
+                                                   style="display: none;">
+                                            <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                    onclick="this.previousElementSibling.click()">
+                                                <i class="fas fa-edit"></i> Replace Image
+                                            </button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" class="btn btn-outline-success" 
+                                                        onclick="movePageUp(this)" title="Move Up">
+                                                    <i class="fas fa-chevron-up"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-success" 
+                                                        onclick="movePageDown(this)" title="Move Down">
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger" 
+                                                        onclick="deletePage(this)" title="Delete Page">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                <!-- New Pages Section -->
+                <div class="mb-4" id="newPagesSection" style="{{ $epaper->pages->count() > 0 ? 'display: none;' : '' }}">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <label class="form-label mb-0">
+                            @if($epaper->pages->count() > 0)
+                                Replace All Pages
+                            @else
+                                Page Images *
+                            @endif
+                        </label>
+                        <div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addNewPageUpload()">
+                                <i class="fas fa-plus"></i> Add Page
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addMultipleNewPages()">
+                                <i class="fas fa-images"></i> Add Multiple
+                            </button>
+                            @if($epaper->pages->count() > 0)
+                                <button type="button" class="btn btn-outline-info btn-sm ms-2" onclick="toggleNewPagesSection()">
+                                    <i class="fas fa-times"></i> Cancel Replace
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    <div id="newPagesContainer">
+                        @if($epaper->pages->count() == 0)
+                            <!-- Initial upload field for new e-papers -->
+                            <div class="new-page-item mb-3" data-index="0">
+                                <div class="row align-items-center">
+                                    <div class="col-md-3">
+                                        <label class="form-label small">Page 1:</label>
+                                        <input type="file" class="form-control form-control-sm" 
+                                               name="new_page_images[]" accept="image/*" 
+                                               onchange="previewNewPageImage(this)" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="image-preview-container" style="height: 80px; display: none;">
+                                            <img class="preview-img" src="" alt="Preview" 
+                                                 style="height: 100%; width: auto; object-fit: cover; border-radius: 4px;">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" class="btn btn-outline-success" 
+                                                    onclick="moveNewPageUp(this)" title="Move Up" disabled>
+                                                <i class="fas fa-chevron-up"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-success" 
+                                                    onclick="moveNewPageDown(this)" title="Move Down">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger" 
+                                                    onclick="removeNewPageUpload(this)" title="Remove" disabled>
+                                                <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
                                     </div>
-                                @endforeach
+                                </div>
                             </div>
-                            <div class="mt-2">
-                                <small class="text-muted">
-                                    <i class="bi bi-info-circle"></i> You can drag pages to reorder them. Click the trash icon to remove a page.
-                                </small>
-                            </div>
-                        </div>
-                    @endif
-
-                    <!-- New Images Preview -->
-                    <div id="newImagesPreview" class="mt-3" style="display: none;">
-                        <h6>New Images Preview:</h6>
-                        <div id="newImagesContainer" class="row sortable-container"></div>
-                        <div class="mt-2">
-                            <small class="text-muted">
-                                <i class="bi bi-info-circle"></i> You can drag images to reorder them. These will replace all existing pages.
-                            </small>
-                        </div>
+                        @endif
+                    </div>
+                    
+                    <div class="form-text">
+                        @if($epaper->pages->count() > 0)
+                            <i class="fas fa-warning text-warning"></i> 
+                            <strong>Warning:</strong> Adding new images will replace ALL existing pages.
+                        @else
+                            <i class="fas fa-info-circle"></i> Upload images in order. Supported formats: WEBP, JPG, JPEG, PNG
+                        @endif
                     </div>
                 </div>
 
-                <!-- Hidden inputs for page reordering and deletion -->
+                @if($epaper->pages->count() > 0)
+                    <div class="mb-3">
+                        <div class="alert alert-info">
+                            <strong>Options:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li><strong>Manage existing pages:</strong> Reorder, replace individual images, or delete pages</li>
+                                <li><strong>Replace all pages:</strong> 
+                                    <button type="button" class="btn btn-link p-0" onclick="showNewPagesSection()">
+                                        Click here to upload completely new set of pages
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Hidden file input for multiple selection -->
+                <input type="file" id="multipleNewPageInput" multiple accept="image/*" 
+                       style="display: none;" onchange="handleMultipleNewPages(this)">
+
+                <!-- Hidden inputs for tracking changes -->
                 <input type="hidden" name="page_order" id="page_order" value="">
                 <input type="hidden" name="deleted_pages" id="deleted_pages" value="">
+                <input type="hidden" name="replace_all_pages" id="replace_all_pages" value="0">
 
                 <div class="d-flex justify-content-between">
                     <a href="{{ route('admin.index') }}" class="btn btn-secondary">
@@ -195,414 +290,390 @@
 
 @push('styles')
 <style>
-    .sortable-container {
-        min-height: 120px;
-    }
-    
-    .draggable-item {
-        cursor: move;
+    .existing-page-item, .new-page-item {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        background: #f8f9fa;
         transition: all 0.2s ease;
-        user-select: none;
-        position: relative;
     }
     
-    .draggable-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    .existing-page-item:hover, .new-page-item:hover {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
-    .draggable-item.dragging {
+    .existing-page-item.deleted {
+        background: #fee;
+        border-color: #f5c6cb;
         opacity: 0.6;
-        transform: rotate(5deg);
-        z-index: 1000;
     }
     
-    .drag-over {
-        border: 2px dashed #007bff;
-        background-color: rgba(0,123,255,0.05);
-    }
-    
-    .drag-handle {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        background: rgba(0,0,0,0.7);
-        color: white;
-        border-radius: 50%;
-        width: 25px;
-        height: 25px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        opacity: 0;
-        transition: opacity 0.2s ease;
-        z-index: 10;
-        cursor: grab;
-    }
-    
-    .draggable-item:hover .drag-handle {
-        opacity: 1;
-    }
-    
-    .page-number {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(0,0,0,0.8);
-        color: white;
-        text-align: center;
-        padding: 4px;
-        font-size: 11px;
+    .existing-page-item.deleted::after {
+        content: ' (WILL BE DELETED)';
+        color: #dc3545;
         font-weight: bold;
+        font-size: 12px;
     }
     
-    .delete-page-btn {
-        position: absolute;
-        top: 5px;
-        left: 5px;
-        width: 25px;
-        height: 25px;
-        padding: 0;
-        opacity: 0;
-        transition: opacity 0.2s ease;
-        z-index: 10;
-        border: none;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .draggable-item:hover .delete-page-btn {
-        opacity: 1;
-    }
-    
-    .deleted-page {
-        opacity: 0.3;
-        filter: grayscale(100%);
-        pointer-events: none;
-    }
-    
-    .deleted-page::after {
-        content: 'DELETED';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(220, 53, 69, 0.9);
-        color: white;
-        padding: 5px 10px;
+    .page-thumbnail {
+        border: 2px solid #dee2e6;
         border-radius: 4px;
-        font-weight: bold;
-        font-size: 12px;
-        z-index: 15;
+        overflow: hidden;
     }
-
-    .sortable-item {
-        margin-bottom: 15px;
+    
+    .page-info {
+        padding: 5px 0;
     }
-
-    .new-image-item {
-        position: relative;
-        cursor: move;
-    }
-
-    .new-image-item .remove-btn {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        z-index: 10;
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        padding: 0;
+    
+    .image-preview-container {
         display: flex;
         align-items: center;
         justify-content: center;
+        border: 2px dashed #dee2e6;
+        border-radius: 4px;
+        background: white;
+    }
+    
+    .preview-img {
+        max-width: 100%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .slide-out {
+        animation: slideOut 0.2s ease-out forwards;
+    }
+    
+    @keyframes slideOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(-20px); }
+    }
+
+    #newPagesSection {
+        border: 2px dashed #007bff;
+        border-radius: 8px;
+        padding: 20px;
+        background: rgba(0, 123, 255, 0.02);
     }
 </style>
 @endpush
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('editForm');
-    const fileInput = document.getElementById('page_images'); // Fixed ID
-    const previewDiv = document.getElementById('newImagesPreview');
-    const previewContainer = document.getElementById('newImagesContainer');
-    const pageOrderInput = document.getElementById('page_order');
-    const deletedPagesInput = document.getElementById('deleted_pages');
-    
-    let filesArray = [];
+    let newPageCount = 0;
     let deletedPages = [];
 
-    // Handle file input change
-    if (fileInput) {
-        fileInput.addEventListener('change', function () {
-            filesArray = Array.from(this.files);
-            previewNewImages();
-        });
-    }
-
-    // Preview new images function
-    function previewNewImages() {
-        if (!previewContainer) return;
-        
-        previewContainer.innerHTML = '';
-        if (filesArray.length === 0) {
-            previewDiv.style.display = 'none';
-            return;
-        }
-
-        filesArray.forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const colDiv = document.createElement('div');
-                colDiv.className = 'col-md-2 col-sm-3 col-4 mb-3 sortable-item new-image-item';
-                colDiv.draggable = true;
-                colDiv.dataset.index = index;
-
-                colDiv.innerHTML = `
-                    <div class="card h-100 position-relative">
-                        <div class="drag-handle">
-                            <i class="bi bi-grip-vertical"></i>
-                        </div>
-                        <img src="${e.target.result}" class="card-img-top" 
-                             style="height: 100px; object-fit: cover;"
-                             alt="New Page ${index + 1}">
-                        <div class="page-number">New Page ${index + 1}</div>
-                        <button type="button" class="btn btn-danger btn-sm remove-btn" 
-                                title="Remove this image">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-                `;
-
-                // Add remove functionality
-                const removeBtn = colDiv.querySelector('.remove-btn');
-                removeBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    filesArray.splice(index, 1);
-                    updateFileInput();
-                    previewNewImages();
-                });
-
-                previewContainer.appendChild(colDiv);
-            };
-            reader.readAsDataURL(file);
-        });
-
-        previewDiv.style.display = 'block';
-        initNewImagesDragAndDrop();
-    }
-
-    // Update file input with reordered files
-    function updateFileInput() {
-        const dt = new DataTransfer();
-        filesArray.forEach(file => {
-            dt.items.add(file);
-        });
-        fileInput.files = dt.files;
-    }
-
-    // Initialize drag and drop for new images
-    function initNewImagesDragAndDrop() {
-        const items = previewContainer.querySelectorAll('.sortable-item');
-        
-        items.forEach(item => {
-            item.addEventListener('dragstart', handleDragStart);
-            item.addEventListener('dragover', handleDragOver);
-            item.addEventListener('drop', handleDrop);
-            item.addEventListener('dragend', handleDragEnd);
-            item.addEventListener('dragenter', handleDragEnter);
-            item.addEventListener('dragleave', handleDragLeave);
-        });
-    }
-
-    // Initialize drag and drop for existing pages
-    function initExistingPagesDragAndDrop() {
-        const container = document.getElementById('currentPagesContainer');
-        if (!container) return;
-
-        const items = container.querySelectorAll('.draggable-item');
-        
-        items.forEach(item => {
-            item.addEventListener('dragstart', handleDragStart);
-            item.addEventListener('dragover', handleDragOver);
-            item.addEventListener('drop', handleDrop);
-            item.addEventListener('dragend', handleDragEnd);
-            item.addEventListener('dragenter', handleDragEnter);
-            item.addEventListener('dragleave', handleDragLeave);
-        });
-
-        // Add delete functionality
-        const deleteButtons = container.querySelectorAll('.delete-page-btn');
-        deleteButtons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                deleteExistingPage(this);
-            });
-        });
-    }
-
-    // Drag and drop event handlers
-    let dragSrcEl = null;
-
-    function handleDragStart(e) {
-        dragSrcEl = this;
-        this.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/html', this.outerHTML);
-    }
-
-    function handleDragOver(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        return false;
-    }
-
-    function handleDragEnter(e) {
-        this.classList.add('drag-over');
-    }
-
-    function handleDragLeave(e) {
-        this.classList.remove('drag-over');
-    }
-
-    function handleDrop(e) {
-        e.stopPropagation();
-        e.preventDefault();
-
-        if (dragSrcEl !== this) {
-            // Determine if we're dealing with new images or existing pages
-            const isNewImage = dragSrcEl.classList.contains('new-image-item');
-            const isExistingPage = dragSrcEl.dataset.pageId;
-
-            if (isNewImage && this.classList.contains('new-image-item')) {
-                // Reorder new images
-                const srcIndex = parseInt(dragSrcEl.dataset.index);
-                const targetIndex = parseInt(this.dataset.index);
-                
-                // Swap files in array
-                const temp = filesArray[srcIndex];
-                filesArray[srcIndex] = filesArray[targetIndex];
-                filesArray[targetIndex] = temp;
-                
-                updateFileInput();
-                previewNewImages();
-            } else if (isExistingPage && this.dataset.pageId) {
-                // Reorder existing pages - move DOM element
-                const parent = dragSrcEl.parentNode;
-                
-                if (dragSrcEl !== this) {
-                    const allItems = Array.from(parent.children);
-                    const srcIndex = allItems.indexOf(dragSrcEl);
-                    const targetIndex = allItems.indexOf(this);
-                    
-                    if (srcIndex < targetIndex) {
-                        parent.insertBefore(dragSrcEl, this.nextSibling);
-                    } else {
-                        parent.insertBefore(dragSrcEl, this);
-                    }
-                    
-                    // Update page numbers visually
-                    updateExistingPageNumbers();
-                    updatePageOrder();
-                }
-            }
-        }
-
-        this.classList.remove('drag-over');
-        return false;
-    }
-
-    function handleDragEnd(e) {
-        this.classList.remove('dragging');
-        // Clean up drag-over classes
-        const items = document.querySelectorAll('.drag-over');
-        items.forEach(item => item.classList.remove('drag-over'));
-    }
-
-    // Delete existing page
-    function deleteExistingPage(button) {
-        const pageItem = button.closest('.draggable-item');
-        const pageId = button.dataset.pageId;
-        
-        if (pageItem && pageId) {
-            // Add to deleted pages array
-            if (!deletedPages.includes(pageId)) {
-                deletedPages.push(pageId);
-            }
-            
-            // Mark as deleted visually
-            pageItem.classList.add('deleted-page');
-            pageItem.draggable = false;
-            
-            // Update hidden input
-            deletedPagesInput.value = deletedPages.join(',');
-            
-            // Update page numbers after deletion
-            updateExistingPageNumbers();
-            
-            // Update page order (exclude deleted pages)
-            updatePageOrder();
-        }
-    }
-
-    // Update existing page numbers visually
-    function updateExistingPageNumbers() {
-        const container = document.getElementById('currentPagesContainer');
-        if (!container) return;
-        
-        const pages = container.querySelectorAll('.draggable-item:not(.deleted-page)');
-        pages.forEach((page, index) => {
-            const pageNumberElement = page.querySelector('.page-number');
-            if (pageNumberElement) {
-                pageNumberElement.textContent = `Page ${index + 1}`;
-            }
-        });
-    }
-
-    // Update page order
-    function updatePageOrder() {
-        const container = document.getElementById('currentPagesContainer');
-        if (!container || !pageOrderInput) return;
-        
-        const pages = container.querySelectorAll('.draggable-item:not(.deleted-page)');
-        const order = Array.from(pages).map(item => item.dataset.pageId).filter(id => id);
-        pageOrderInput.value = order.join(',');
-        
-        console.log('Updated page order:', order); // Debug log
-    }
-
-    // PDF validation function (if needed)
-    window.validatePdf = function(input) {
+    function validatePdf(input) {
         const file = input.files[0];
-        if (file && file.type !== 'application/pdf') {
-            alert('Please select a valid PDF file.');
+        if (file && file.size / 1024 / 1024 > 100) {
+            alert('PDF file size should not exceed 100MB');
             input.value = '';
             return false;
         }
         return true;
-    };
+    }
+
+    // New Pages Management
+    function showNewPagesSection() {
+        document.getElementById('newPagesSection').style.display = 'block';
+        document.getElementById('replace_all_pages').value = '1';
+        
+        // Add initial upload if container is empty
+        const container = document.getElementById('newPagesContainer');
+        if (container.children.length === 0) {
+            addNewPageUpload();
+        }
+    }
+
+    function toggleNewPagesSection() {
+        const section = document.getElementById('newPagesSection');
+        if (section.style.display === 'none') {
+            showNewPagesSection();
+        } else {
+            section.style.display = 'none';
+            document.getElementById('replace_all_pages').value = '0';
+            // Clear all new page uploads
+            document.getElementById('newPagesContainer').innerHTML = '';
+            newPageCount = 0;
+        }
+    }
+
+    function addNewPageUpload() {
+        const container = document.getElementById('newPagesContainer');
+        const newIndex = newPageCount++;
+        
+        const newItem = document.createElement('div');
+        newItem.className = 'new-page-item mb-3 fade-in';
+        newItem.dataset.index = newIndex;
+        newItem.innerHTML = `
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <label class="form-label small">Page ${newIndex + 1}:</label>
+                    <input type="file" class="form-control form-control-sm" 
+                           name="new_page_images[]" accept="image/*" 
+                           onchange="previewNewPageImage(this)">
+                </div>
+                <div class="col-md-6">
+                    <div class="image-preview-container" style="height: 80px; display: none;">
+                        <img class="preview-img" src="" alt="Preview" 
+                             style="height: 100%; width: auto; object-fit: cover; border-radius: 4px;">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-success" 
+                                onclick="moveNewPageUp(this)" title="Move Up">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-success" 
+                                onclick="moveNewPageDown(this)" title="Move Down">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" 
+                                onclick="removeNewPageUpload(this)" title="Remove">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(newItem);
+        updateNewPageControls();
+    }
+
+    function addMultipleNewPages() {
+        document.getElementById('multipleNewPageInput').click();
+    }
+
+    function handleMultipleNewPages(input) {
+        const files = Array.from(input.files);
+        files.forEach(file => {
+            addNewPageUpload();
+            const items = document.querySelectorAll('.new-page-item');
+            const lastItem = items[items.length - 1];
+            const fileInput = lastItem.querySelector('input[type="file"]');
+            
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            
+            previewNewPageImage(fileInput);
+        });
+        
+        input.value = '';
+    }
+
+    function previewNewPageImage(input) {
+        const item = input.closest('.new-page-item');
+        const previewContainer = item.querySelector('.image-preview-container');
+        const previewImg = item.querySelector('.preview-img');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewContainer.style.display = 'flex';
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            previewContainer.style.display = 'none';
+        }
+    }
+
+    function removeNewPageUpload(button) {
+        const item = button.closest('.new-page-item');
+        const items = document.querySelectorAll('.new-page-item');
+        
+        if (items.length <= 1 && document.getElementById('replace_all_pages').value === '1') {
+            alert('At least one page image is required when replacing all pages');
+            return;
+        }
+        
+        item.classList.add('slide-out');
+        setTimeout(() => {
+            item.remove();
+            updateNewPageNumbers();
+            updateNewPageControls();
+        }, 200);
+    }
+
+    function moveNewPageUp(button) {
+        const item = button.closest('.new-page-item');
+        const prev = item.previousElementSibling;
+        if (prev) {
+            item.parentNode.insertBefore(item, prev);
+            updateNewPageNumbers();
+            updateNewPageControls();
+        }
+    }
+
+    function moveNewPageDown(button) {
+        const item = button.closest('.new-page-item');
+        const next = item.nextElementSibling;
+        if (next) {
+            item.parentNode.insertBefore(next, item);
+            updateNewPageNumbers();
+            updateNewPageControls();
+        }
+    }
+
+    function updateNewPageNumbers() {
+        const items = document.querySelectorAll('.new-page-item');
+        items.forEach((item, index) => {
+            const label = item.querySelector('label');
+            label.textContent = `Page ${index + 1}:`;
+        });
+    }
+
+    function updateNewPageControls() {
+        const items = document.querySelectorAll('.new-page-item');
+        
+        items.forEach((item, index) => {
+            const upBtn = item.querySelector('.btn-outline-success:first-child');
+            const downBtn = item.querySelector('.btn-outline-success:last-child');
+            const removeBtn = item.querySelector('.btn-outline-danger');
+            
+            upBtn.disabled = index === 0;
+            downBtn.disabled = index === items.length - 1;
+            removeBtn.disabled = items.length <= 1 && document.getElementById('replace_all_pages').value === '1';
+        });
+    }
+
+    // Existing Pages Management
+    function previewReplacement(input, pageId) {
+        const item = input.closest('.existing-page-item');
+        const thumbnail = item.querySelector('.page-thumbnail img');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                thumbnail.src = e.target.result;
+                thumbnail.style.border = '2px solid #28a745';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function deletePage(button) {
+        const item = button.closest('.existing-page-item');
+        const pageId = item.dataset.pageId;
+        
+        if (confirm('Are you sure you want to delete this page?')) {
+            if (!deletedPages.includes(pageId)) {
+                deletedPages.push(pageId);
+            }
+            
+            item.classList.add('deleted');
+            button.disabled = true;
+            
+            updateDeletedPagesInput();
+            updateExistingPageNumbers();
+        }
+    }
+
+    function movePageUp(button) {
+        const item = button.closest('.existing-page-item');
+        const prev = item.previousElementSibling;
+        if (prev && !prev.classList.contains('deleted') && !item.classList.contains('deleted')) {
+            item.parentNode.insertBefore(item, prev);
+            updateExistingPageNumbers();
+            updateExistingPageOrder();
+        }
+    }
+
+    function movePageDown(button) {
+        const item = button.closest('.existing-page-item');
+        const next = item.nextElementSibling;
+        if (next && !next.classList.contains('deleted') && !item.classList.contains('deleted')) {
+            item.parentNode.insertBefore(next, item);
+            updateExistingPageNumbers();
+            updateExistingPageOrder();
+        }
+    }
+
+    function updateExistingPageNumbers() {
+        const items = document.querySelectorAll('.existing-page-item:not(.deleted)');
+        items.forEach((item, index) => {
+            const label = item.querySelector('label');
+            label.textContent = `Page ${index + 1}:`;
+        });
+    }
+
+    function updateExistingPageOrder() {
+        const items = document.querySelectorAll('.existing-page-item:not(.deleted)');
+        const order = Array.from(items).map(item => item.dataset.pageId);
+        document.getElementById('page_order').value = order.join(',');
+    }
+
+    function updateDeletedPagesInput() {
+        document.getElementById('deleted_pages').value = deletedPages.join(',');
+    }
+
+    // Insert page functionality
+    function addPageAfter() {
+        // This would need to be implemented based on your specific requirements
+        alert('Insert page functionality - would open a dialog to select where to insert and upload new page');
+    }
+
+    function addPageAtEnd() {
+        addNewPageUpload();
+        showNewPagesSection();
+    }
+
+    // Form submission
+    document.getElementById('editForm').addEventListener('submit', function(e) {
+        updateExistingPageOrder();
+        updateDeletedPagesInput();
+        
+        // Validation
+        const hasExistingPages = document.querySelectorAll('.existing-page-item:not(.deleted)').length > 0;
+        const hasNewPages = document.querySelectorAll('.new-page-item input[type="file"]').length > 0;
+        const replaceAllPages = document.getElementById('replace_all_pages').value === '1';
+        
+        if (!hasExistingPages && !hasNewPages) {
+            e.preventDefault();
+            alert('E-paper must have at least one page.');
+            return;
+        }
+        
+        if (replaceAllPages) {
+            // Check if all new page inputs have files
+            const newPageInputs = document.querySelectorAll('.new-page-item input[type="file"]');
+            let allHaveFiles = true;
+            newPageInputs.forEach(input => {
+                if (!input.files || input.files.length === 0) {
+                    allHaveFiles = false;
+                }
+            });
+            
+            if (!allHaveFiles) {
+                e.preventDefault();
+                alert('Please upload images for all new pages or cancel the "Replace All Pages" option.');
+                return;
+            }
+        }
+    });
 
     // Initialize on page load
-    initExistingPagesDragAndDrop();
-    
-    // Set initial page order on load
-    updatePageOrder();
-    
-    // Form submission handler
-    form.addEventListener('submit', function(e) {
-        // Update page order one final time before submission
-        updatePageOrder();
-        console.log('Final page order on submit:', pageOrderInput.value); // Debug log
-        console.log('Deleted pages on submit:', deletedPagesInput.value); // Debug log
+    document.addEventListener('DOMContentLoaded', function() {
+        updateExistingPageOrder();
+        
+        // Set up initial new page count if there are existing new page items
+        newPageCount = document.querySelectorAll('.new-page-item').length;
+        updateNewPageControls();
     });
-});
 </script>
 @endpush

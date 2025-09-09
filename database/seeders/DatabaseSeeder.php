@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
      */
     private function createSampleEpapers(): void
     {
-        $cities = ['Odisha', 'Ranchi', 'Delhi'];
+        $cities = ['Bhubaneswar', 'Cuttack', 'Jagatsinghpur'];
 
         for ($i = 0; $i < 10; $i++) {
             $date = Carbon::now()->subDays($i);
