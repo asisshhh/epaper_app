@@ -48,18 +48,6 @@
                         </button>
                     </div>
         </div>
-
-           {{-- <div class="col-lg-3 col-md-6 mb-2">
-                <label class="form-label">View Options:</label>
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-outline-secondary btn-sm active" id="gridView" onclick="toggleView('grid')">
-                        <i class="fas fa-th-large"></i> Grid
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="listView" onclick="toggleView('list')">
-                        <i class="fas fa-list"></i> List
-                    </button>
-                </div>
-            </div> --}}
             
             <div class="col-lg-3 col-md-6 mb-2">
                 @if($epaper && $epaper->pdf_path)
@@ -81,11 +69,9 @@
                             </li>
                             <li>
                                 @if($pdfUrl)
-    
         <a href="{{ $pdfUrl }}" target="_blank" class="dropdown-item">
             <i class="fas fa-file-pdf"></i> View Full PDF
         </a>
-
 
     <iframe src="{{ $pdfUrl }}" width="100%" height="400px"></iframe>
 @else
@@ -101,15 +87,6 @@
                         <i class="fas fa-download"></i> No PDF Available
                     </button>
                 @endif
-            </div>
-        </div>
-        
-        <!-- Pagination -->
-       <div class="row mt-3">
-    
-              
-            
-                         
             </div>
         </div>
     </div>
@@ -139,7 +116,7 @@
             </div>
             
             <!-- Main Page View -->
-            <div class="col-lg-8 col-md-6" id="mainContentArea">
+           <div class="col-lg-8 col-md-6" id="mainContentArea">
                 <div class="main-page-view" id="mainPageView">
                     <nav aria-label="Epaper page navigation">
     <div class="d-flex justify-content-between align-items-center w-100">
@@ -163,7 +140,7 @@
             <div class="page-info text-center">
                 <h6 class="mb-0">
                     {{ $epaper->title }} - {{ $epaper->formatted_date }}
-                    <span class="badge bg-primary ms-2">Page {{ $currentPage->page_number }}</span>
+                    {{-- <span class="badge bg-primary ms-2">Page {{ $page }}</span> --}}
                 </h6>
             </div>
 
@@ -183,7 +160,6 @@
 
     </div>
 </nav>
-
                         
                         <div class="image-container" id="imageContainer">
                             <img id="mainPageImage" 
@@ -193,13 +169,25 @@
                                  style="cursor: zoom-in;">
                         </div>
                         
-                    
-                        <div id="loadingIndicator" class="text-center" style="display: none;">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="mt-2">Loading page...</p>
+                        <!-- Bottom Navigation -->
+                        <div class="modern-nav-controls d-flex justify-content-center align-items-center mt-4">
+                            <button class="btn btn-modern nav-btn" 
+                                    onclick="prevPage()" 
+                                    {{ !$epaper || $page <= 1 ? 'disabled' : '' }}>
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </button>
+                            
+                            <span class="page-counter mx-4">
+                                {{ $page }} / {{ $epaper->pages->count() }}
+                            </span>
+                            
+                            <button class="btn btn-modern nav-btn" 
+                                    onclick="nextPage()" 
+                                    {{ !$epaper || $page >= $epaper->pages->count() ? 'disabled' : '' }}>
+                                Next <i class="fas fa-chevron-right"></i>
+                            </button>
                         </div>
+                        
                     @else
                         <div class="alert alert-info text-center">
                             <i class="fas fa-info-circle fa-2x mb-2"></i>
@@ -208,24 +196,15 @@
                         </div>
                     @endif
 
-                    <div class="col-12">
-                      <nav aria-label="Epaper page navigation">
-                      <ul class="pagination d-flex justify-content-end">
-                    <li class="page-item {{ !$epaper || $page <= 0 ? 'disabled' : '' }}">
-                    <button class="page-link" onclick="prevPage()" tabindex="-1">
-                        <i class="fas fa-angle-left"></i> Prev
-                    </button>
-                </li>
-                <li class="page-item {{ !$epaper || $page >= ($epaper->total_pages ?? 1) ? 'disabled' : '' }}">
-                    <button class="page-link" onclick="nextPage()">
-                        Next <i class="fas fa-angle-right"></i>
-                    </button>
-                </li>
-            </ul>
-                      </nav>
+                    <div id="loadingIndicator" class="text-center" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading page...</p>
                     </div>
+
                     <!-- Social Share Buttons -->
-                    <div class="social-share">
+                    <div class="social-share mt-4">
                         <h6 class="text-center mb-3">Share this page:</h6>
                         <div class="text-center">
                             <button class="btn btn-facebook text-white" onclick="shareOnFacebook()" title="Share on Facebook">
@@ -250,46 +229,17 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-2 col-md-3" id="adsSidebar">
-        <div class="sidebar-header mb-3">
-            <h6 class="text-muted"><i class="fas fa-ad"></i> Ads</h6>
-        </div>
-        <div class="sidebar-thumbnails">
-            <img src="{{ asset('logo/image.png') }}" class="img-fluid mb-3" alt="Ad 1">
-            <img src="{{ asset('logo/image.png') }}" class="img-fluid mb-3" alt="Ad 2">
-            {{-- More ads here --}}
-        </div>
-    </div>
-        </div>
-        
             
-        
-        <!-- List View -->
-        {{-- <div class="row" id="listViewContent" style="display: none;">
-            <div class="col-12">
-                <div class="list-view-container">
-                    <h5 class="mb-3">{{ $epaper->title }} - {{ $epaper->formatted_date }}</h5>
-                    <div class="row">
-                        @foreach($epaper->pages as $pageItem)
-                            <div class="col-lg-4 col-md-6 mb-4">
-                                <div class="card page-card" onclick="selectPage({{ $pageItem->page_number }})">
-                                    <img src="{{ $pageItem->thumbnail_url }}" 
-                                         class="card-img-top" 
-                                         alt="Page {{ $pageItem->page_number }}"
-                                         style="height: 200px; object-fit: cover;">
-                                    <div class="card-body text-center">
-                                        <h6 class="card-title">Page {{ $pageItem->page_number }}</h6>
-                                        <button class="btn btn-primary btn-sm">
-                                            <i class="fas fa-eye"></i> View
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
+            <div class="col-lg-2 col-md-3" id="adsSidebar">
+                <div class="sidebar-header mb-3">
+                    <h6 class="text-muted"><i class="fas fa-ad"></i> Ads</h6>
+                </div>
+                <div class="sidebar-thumbnails">
+                    <img src="{{ asset('logo/image.png') }}" class="img-fluid mb-3" alt="Ad 1">
+                    <img src="{{ asset('logo/image.png') }}" class="img-fluid mb-3" alt="Ad 2">
                 </div>
             </div>
-        </div> --}}
+        </div>
     @else
         <!-- No E-Paper Available -->
         <div class="row">
@@ -332,16 +282,100 @@
         </div>
     </div>
 </div>
+
+<style>
+.modern-nav-controls {
+    padding: 20px 0;
+}
+
+.btn-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.btn-modern:hover:not(:disabled) {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.btn-modern:disabled {
+    background: #e9ecef;
+    color: #6c757d;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-info-card {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+    text-align: center;
+    min-width: 300px;
+}
+
+.page-info-card h5 {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.page-counter {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+@media (max-width: 768px) {
+    .modern-nav-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .page-info-card {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .btn-modern {
+        min-width: 100px;
+    }
+}
+</style>
+
 @endsection
 
 @push('scripts')
 <script>
-    let currentEpaper = @json($epaper);
+    let currentEpaper = @if($epaper) {
+        title: @json($epaper->title),
+        formatted_date: @json($epaper->formatted_date),
+        id: @json($epaper->id),
+        total_pages: {{ $epaper->pages->count() }}
+    } @else null @endif;
+    
     let currentPage = {{ $page }};
     let currentCity = '{{ $edition }}';
     let currentZoom = 100;
-    let currentView = 'grid';
-
 
     document.addEventListener('DOMContentLoaded', function() {
         // Add click event to main image for fullscreen
@@ -362,7 +396,21 @@
     function changeDate() {
         const date = document.getElementById('dateSelect').value;
         showLoading();
-        window.location.href = `{{ route('epaper.index') }}?date=${date}&edition=${currentCity}`;
+        fetch(`{{ route('epaper.getEpaperData') }}?date=${date}&edition=${currentCity}`)
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            if (!data.success) {
+                showAlert(data.message, 'warning');
+                return;
+            }
+            window.location.href = `{{ route('epaper.index') }}?date=${date}&edition=${currentCity}`;
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('Error fetching e-paper data:', error);
+            showAlert('Error fetching e-paper data. Please try again.', 'danger');
+        });
     }
 
     function changePage() {
@@ -377,11 +425,13 @@
         
         // Update URL
         const url = new URL(window.location);
-        //url.searchParams.set('page', pageNumber);
+        url.searchParams.set('page', pageNumber);
+        url.searchParams.set('edition', currentCity);
+        url.searchParams.set('date', document.getElementById('dateSelect').value);
         window.history.pushState({}, '', url);
         
         // Update current page
-        currentPage = pageNumber;
+        currentPage = parseInt(pageNumber);
         
         // Update page selector
         document.getElementById('pageSelect').value = pageNumber;
@@ -394,6 +444,9 @@
             }
         });
         
+        // Update navigation buttons
+        updateNavigationButtons();
+        
         // Load page image via AJAX
         fetch(`{{ route('epaper.getPage') }}?epaper_id=${currentEpaper.id}&page_number=${pageNumber}`)
             .then(response => response.json())
@@ -401,16 +454,20 @@
                 hideLoading();
                 if (data.success && data.page) {
                     const mainImage = document.getElementById('mainPageImage');
-                    const pageInfo = document.querySelector('.page-info .badge');
-                    
                     if (mainImage) {
                         mainImage.src = data.page.image_url;
                         mainImage.alt = `Page ${data.page.page_number}`;
                     }
                     
-                    if (pageInfo) {
-                        pageInfo.textContent = `Page ${data.page.page_number}`;
-                    }
+                    // Update page info displays
+                    const pageInfos = document.querySelectorAll('.page-info-card p, .page-counter');
+                    pageInfos.forEach(info => {
+                        if (info.classList.contains('page-counter')) {
+                            info.textContent = `${data.page.page_number} / ${currentEpaper.total_pages}`;
+                        } else {
+                            info.textContent = `${currentEpaper.formatted_date} - Page ${data.page.page_number} of ${currentEpaper.total_pages}`;
+                        }
+                    });
                     
                     // Update fullscreen modal title
                     document.getElementById('fullscreenModalLabel').textContent = `Page ${data.page.page_number} - Full View`;
@@ -423,10 +480,17 @@
             });
     }
 
-    function firstPage() {
-        if (currentEpaper && currentPage > 1) {
-            selectPage(1);
-        }
+    function updateNavigationButtons() {
+        const prevButtons = document.querySelectorAll('button[onclick="prevPage()"]');
+        const nextButtons = document.querySelectorAll('button[onclick="nextPage()"]');
+        
+        prevButtons.forEach(btn => {
+            btn.disabled = currentPage <= 1;
+        });
+        
+        nextButtons.forEach(btn => {
+            btn.disabled = currentPage >= currentEpaper.total_pages;
+        });
     }
 
     function prevPage() {
@@ -438,6 +502,12 @@
     function nextPage() {
         if (currentEpaper && currentPage < currentEpaper.total_pages) {
             selectPage(currentPage + 1);
+        }
+    }
+
+    function firstPage() {
+        if (currentEpaper && currentPage > 1) {
+            selectPage(1);
         }
     }
 
@@ -474,27 +544,6 @@
             mainImage.style.cursor = currentZoom >= 100 ? 'zoom-out' : 'zoom-in';
         }
         document.getElementById('zoomLevel').textContent = currentZoom + '%';
-    }
-
-    // View toggle functions
-    function toggleView(view) {
-        currentView = view;
-        const gridBtn = document.getElementById('gridView');
-        const listBtn = document.getElementById('listView');
-        const gridContent = document.getElementById('epaperContent');
-        const listContent = document.getElementById('listViewContent');
-        
-        if (view === 'grid') {
-            gridBtn.classList.add('active');
-            listBtn.classList.remove('active');
-            gridContent.style.display = 'flex';
-            listContent.style.display = 'none';
-        } else {
-            listBtn.classList.add('active');
-            gridBtn.classList.remove('active');
-            gridContent.style.display = 'none';
-            listContent.style.display = 'block';
-        }
     }
 
     function printPage() {
@@ -592,40 +641,56 @@
         const container = document.querySelector('.container');
         container.insertBefore(alertDiv, container.firstChild);
         
-        // Auto-dismiss after 5 seconds
         setTimeout(() => {
             alertDiv.remove();
         }, 5000);
     }
 
     // Social sharing functions
+    function getEpaperDetails() {
+        return {
+            title: currentEpaper?.title ?? 'Around Odisha E-Paper',
+            date: currentEpaper?.formatted_date ?? '',
+            page: currentPage ?? 1,
+            url: window.location.href
+        };
+    }
+
     function shareOnFacebook() {
-        const url = encodeURIComponent(window.location.href);
-        const title = encodeURIComponent(`${currentEpaper ? currentEpaper.title : 'Around Odisha E-Paper'} - ${currentEpaper ? currentEpaper.formatted_date : ''}`);
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&t=${title}`, '_blank', 'width=600,height=400');
+        const { title, date, page, url } = getEpaperDetails();
+        const quote = encodeURIComponent(`${title} - Page ${page} - ${date}`);
+        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${quote}`;
+        window.open(facebookUrl, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
     }
 
     function shareOnTwitter() {
-        const url = encodeURIComponent(window.location.href);
-        const text = encodeURIComponent(`Reading ${currentEpaper ? currentEpaper.title : 'Around Odisha E-Paper'} - ${currentEpaper ? currentEpaper.formatted_date : ''}`);
-        window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank', 'width=600,height=400');
+        const { title, date, page, url } = getEpaperDetails();
+        const text = encodeURIComponent(`Reading ${title} - Page ${page} - ${date}`);
+        const hashtags = encodeURIComponent('AroundOdisha,EPaper,News');
+        const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${text}&hashtags=${hashtags}`;
+        window.open(twitterUrl, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
     }
 
     function shareOnLinkedIn() {
-        const url = encodeURIComponent(window.location.href);
-        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=600,height=400');
+        const { title, date, page, url } = getEpaperDetails();
+        const text = encodeURIComponent(`${title} - Page ${page} - ${date}\n\nCheck out this e-paper page: ${url}`);
+        const linkedinUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${text}`;
+        window.open(linkedinUrl, '_blank', 'width=650,height=650,scrollbars=yes,resizable=yes');
     }
 
     function shareOnWhatsApp() {
-        const url = encodeURIComponent(window.location.href);
-        const text = encodeURIComponent(`Check out ${currentEpaper ? currentEpaper.title : 'Around Odisha E-Paper'}: ${url}`);
-        window.open(`https://wa.me/?text=${text}`, '_blank');
+        const { title, date, page, url } = getEpaperDetails();
+        const text = encodeURIComponent(`*${title}* - Page ${page}\n${date}\n\nCheck out this e-paper page: ${url}`);
+        const whatsappUrl = `https://wa.me/?text=${text}`;
+        window.open(whatsappUrl, '_blank');
     }
 
     function shareByEmail() {
-        const subject = encodeURIComponent(`${currentEpaper ? currentEpaper.title : 'Around Odisha E-Paper'} - ${currentEpaper ? currentEpaper.formatted_date : ''}`);
-        const body = encodeURIComponent(`Check out this e-paper: ${window.location.href}`);
-        window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        const { title, date, page, url } = getEpaperDetails();
+        const subject = `${title} - Page ${page} - ${date}`;
+        const body = `Check out this e-paper page: ${url}`;
+        const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.location.href = mailtoUrl;
     }
 
     // Keyboard shortcuts
@@ -670,6 +735,11 @@
                 }
                 break;
         }
+    });
+
+    // Initialize navigation buttons on load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateNavigationButtons();
     });
 </script>
 

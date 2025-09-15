@@ -29,13 +29,26 @@ Route::get('/test-image', function () {
 |--------------------------------------------------------------------------
 */
 
+// Main epaper routes with proper page parameter handling
 Route::get('/', [EpaperController::class, 'index'])->name('epaper.index');
 Route::get('/epaper', [EpaperController::class, 'index'])->name('epaper.home');
 Route::get('/epaper/page', [EpaperController::class, 'getPage'])->name('epaper.getPage');
 Route::get('/epaper/download', [EpaperController::class, 'downloadPdf'])->name('epaper.download');
 Route::get('/epaper/archive', [EpaperController::class, 'archive'])->name('epaper.archive');
-Route::get('/epaper/{edition}/{date?}', [EpaperController::class, 'index'])->name('epaper.view');
-Route::get('/epaper/{edition}/{date}/page/{page}', [EpaperController::class, 'archive'])->name('epaper.viewPage');
+Route::get('/epaper/data', [EpaperController::class, 'getEpaperData'])->name('epaper.getEpaperData');
+
+// Updated route to handle page parameter properly
+Route::get('/epaper/{edition}/{date?}', [EpaperController::class, 'index'])
+    ->where(['date' => '[0-9]{4}-[0-9]{2}-[0-9]{2}'])
+    ->name('epaper.view');
+
+// Specific page route for direct page access
+Route::get('/epaper/{edition}/{date}/page/{page}', [EpaperController::class, 'index'])
+    ->where(['date' => '[0-9]{4}-[0-9]{2}-[0-9]{2}', 'page' => '[0-9]+'])
+    ->name('epaper.viewPage');
+
+// Add route for getting epaper data via AJAX
+Route::get('/api/epaper-data', [EpaperController::class, 'getEpaperData'])->name('epaper.getData');
 
 /*
 |--------------------------------------------------------------------------

@@ -190,6 +190,7 @@
                         </li>
                     @endforeach
                 </ul>
+                
 
                 <ul class="navbar-nav">
                     <li class="nav-item">
